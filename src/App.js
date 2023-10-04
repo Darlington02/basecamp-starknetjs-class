@@ -1,37 +1,81 @@
 import './App.css'
 import { connect, disconnect } from '@argent/get-starknet'
 import { useState, useEffect } from 'react'
-import { Contract } from 'starknet'
+import { Contract, Provider, constants } from 'starknet'
 
 import contractAbi from './abis/abi.json'
 const contractAddress = "0x077e0925380d1529772ee99caefa8cd7a7017a823ec3db7c003e56ad2e85e300"
 
 function App() {
-  const [connection, setConnection] = useState();
-  const [account, setAccount] = useState();
-  const [address, setAddress] = useState();
+  const [connection, setConnection] = useState('');
+  const [account, setAccount] = useState('');
+  const [address, setAddress] = useState('');
 
   const [retrievedValue, setRetrievedValue] = useState('')
 
-  const connectWallet = async() => {
+  useEffect(() => {
+    const connectToStarknet = async() => {
+      const connection = await connect({ modalMode: "neverAsk", webWalletUrl: "https://web.argent.xyz" })
 
+      if(connection && connection.isConnected) {
+        setConnection(connection)
+        setAccount(connection.account)
+        setAddress(connection.selectedAddress)
+      }
+    }
+    connectToStarknet()
+  }, [])
+
+  const connectWallet = async() => {
+    const connection = await connect({ webWalletUrl: "https://web.argent.xyz" })
+
+    if(connection && connection.isConnected) {
+      setConnection(connection)
+      setAccount(connection.account)
+      setAddress(connection.selectedAddress)
+    }
   }
 
   const disconnectWallet = async() => {
-
+    await disconnect()
+    setConnection(undefined)
+    setAccount(undefined)
+    setAddress('')
   }
 
   const increaseCounter = async() => {
-
+    try {
+      const contract = new Contract(contractAbi, contractAddress, account)
+      await contract.increment()
+      alert("you successfully increased the counter")
+    }
+    catch(error) {
+      console.log(error.message)
+    }
   }
 
   const decreaseCounter = async() => {
-
+    try {
+      const contract = new Contract(contractAbi, contractAddress, account)
+      await contract.decrement()
+      alert("you sucessfully decreased the counter")
+    }
+    catch(error) {
+      console.log(error.message)
+    }
   }
 
   const getCounter = async() => {
-
-  }
+    const provider = new Provider( {sequencer: { network:constants.NetworkName.SN_MAIN } } )
+    try {
+      const contract = new Contract(contractAbi, contractAddress, provider)
+      const counter = await contract.get_current_count()
+      setRetrievedValue(counter.toString())
+    }
+    catch(error) {
+      console.log(error.message)
+    }
+  } 
 
   return (
     <div className="App">
@@ -40,10 +84,17 @@ function App() {
           <h1 className="title">
             Starknet<a href="#"> Counter</a>
           </h1>
-            <button className="connect" onClick={connectWallet}>Connect wallet</button>
+            {
+              connection ? 
+                <button className="connect" onClick={disconnectWallet}>Disconnect</button>
+              :
+                <button className="connect" onClick={connectWallet}>Connect wallet</button>
+            }
 
           <p className="description">
-          {/* address */}
+          {
+            address ? address : ''
+          }
           </p>
 
           <div className="grid">

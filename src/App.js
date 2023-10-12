@@ -28,11 +28,26 @@ function App() {
 
   const connectWallet = async() => {
     const connection = await connect({ webWalletUrl: "https://web.argent.xyz" })
-
+    console.log(connection)
     if(connection && connection.isConnected) {
       setConnection(connection)
       setAccount(connection.account)
       setAddress(connection.selectedAddress)
+    }
+
+    if(connection.chainId !== 'SN_MAIN') {
+      alert("you need to switch to mainnet to proceed!")
+      try {
+        window.starknet.request({
+          type: "wallet_switchStarknetChain",
+          params: {
+            chainId: "SN_MAIN"
+          }
+        });
+      }
+      catch(error) {
+        alert(error.message)
+      }
     }
   }
 

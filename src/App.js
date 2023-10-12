@@ -22,6 +22,21 @@ function App() {
         setAccount(connection.account)
         setAddress(connection.selectedAddress)
       }
+
+      if(connection.chainId !== 'SN_MAIN') {
+        alert("you need to switch to mainnet to proceed!")
+        try {
+          await window.starknet.request({
+            type: "wallet_switchStarknetChain",
+            params: {
+              chainId: "SN_MAIN"
+            }
+          });
+        }
+        catch(error) {
+          alert(error.message)
+        }
+      }
     }
     connectToStarknet()
   }, [])
@@ -38,7 +53,7 @@ function App() {
     if(connection.chainId !== 'SN_MAIN') {
       alert("you need to switch to mainnet to proceed!")
       try {
-        window.starknet.request({
+        await window.starknet.request({
           type: "wallet_switchStarknetChain",
           params: {
             chainId: "SN_MAIN"

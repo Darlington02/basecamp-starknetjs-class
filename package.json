@@ -1,7 +1,7 @@
 {
   "name": "webwallet",
   "version": "0.1.0",
-  "homepage": "https://example-dapp-pe1hrc0w8-infodarlinx-gmailcom.vercel.app/",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "@argent/get-starknet": "^6.4.7",
